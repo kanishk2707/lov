@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Will you marry me?</title>
+<style>
+  /* Reset */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    background: linear-gradient(180deg,#020617 0%, #081426 55%, #0b1b25 100%);
+    color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+
+  /* Container */
+  .app{
+    width:920px;max-width:96vw;height:640px;max-height:92vh;border-radius:18px;
+    position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(2,6,23,0.7);
+    background:
+      radial-gradient(600px 300px at 50% 12%, rgba(0,255,255,0.06), transparent 10%),
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* animated rays (pure CSS, performant) */
+  .rays{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+  .ray{
+    position:absolute;left:50%;top:-10%;
+    width:260%;height:120%;
+    transform-origin:center top;
+    background: linear-gradient(180deg, rgba(0,255,255,0.18), rgba(0,200,255,0.05));
+    filter: blur(32px) saturate(140%);
+    mix-blend-mode:screen; opacity:0.55;
+    animation: float 7000ms linear infinite;
+  }
+  .ray.r2{ transform: translateX(-40%) rotate(-6deg) scaleX(0.85); opacity:0.42; animation-duration:8200ms }
+  .ray.r3{ transform: translateX(30%) rotate(6deg) scaleX(1.05); opacity:0.35; animation-duration:5800ms; filter: blur(40px) saturate(160%) }
+  @keyframes float {
+    0%{ transform: translateX(-50%) rotate(-1deg) scaleX(1); opacity:0.55 }
+    50%{ transform: translateX(-45%) rotate(1.25deg) scaleX(1.03); opacity:0.9 }
+    100%{ transform: translateX(-50%) rotate(-1deg) scaleX(1); opacity:0.55 }
+  }
+
+  /* Foreground card */
+  .card{
+    position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(700px,92%);padding:36px;border-radius:16px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 12px 40px rgba(3,12,22,0.55);
+    text-align:center;
+  }
+
+  .question{
+    font-size:34px; line-height:1.1; color:#f2fcff; margin-bottom:20px;
+  }
+
+  .buttons{
+    position:relative; height:110px; display:flex; align-items:center; justify-content:center;
+  }
+
+  .btn{
+    user-select:none; padding:14px 28px; font-size:18px; border-radius:12px; border:none;
+    cursor:pointer; transition:transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
+    min-width:140px; font-weight:700;
+  }
+
+  .btn:active{ transform:translateY(2px) scale(0.995) }
+
+  .btn-yes{
+    position:relative;
+    background: linear-gradient(180deg, rgba(0,230,255,0.14), rgba(0,205,255,0.06));
+    color:#eaffff; border:1px solid rgba(0,230,255,0.12);
+    box-shadow:0 12px 30px rgba(0,200,255,0.06), inset 0 -2px 0 rgba(255,255,255,0.03);
+    z-index:7;
+  }
+
+  .btn-no{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    background: linear-gradient(180deg, rgba(255,90,125,0.06), rgba(255,90,125,0.03));
+    color:#ffdce3; border:1px solid rgba(255,90,125,0.06);
+    box-shadow:0 12px 30px rgba(255,80,120,0.03);
+    touch-action: manipulation;
+  }
+
+  /* success overlay */
+  .success{
+    position:absolute; inset:0; z-index:9; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px; background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.46));
+    color:#fff; text-align:center; padding:20px;
+  }
+  .success h1{ font-size:44px; color:#fff8ea; letter-spacing:1px; }
+
+  /* small screens */
+  @media (max-width:520px){
+    .card{ padding:20px; border-radius:12px }
+    .question{ font-size:22px }
+    .buttons{ height:140px }
+    .btn{ font-size:16px; min-width:120px; padding:12px 18px }
+  }
+</style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="rays" aria-hidden="true">
+      <div class="ray r1"></div>
+      <div class="ray r2"></div>
+      <div class="ray r3"></div>
+    </div>
+
+    <div class="card" id="card">
+      <div class="question">will you marry me</div>
+      <div class="buttons" id="buttons">
+        <button id="yes" class="btn btn-yes">Yes</button>
+        <button id="no" class="btn btn-no" aria-label="No">No</button>
+      </div>
+    </div>
+
+    <div id="success" class="success" style="display:none;">
+      <h1>yassssss we  marryyyyy</h1>
+      <p>so happy!</p>
+    </div>
+  </div>
+
+<script>
+/*
+  Behavior:
+   - No button jumps to a random position inside the .buttons area when:
+       - mouse pointer is within threshold px of its center (desktop)
+       - user touches/pointerdown on it (mobile)
+   - Keeps jumping indefinitely until user clicks Yes
+   - Uses only vanilla JS; no external libs
+*/
+
+(function () {
+  const TRIGGER_DISTANCE = 140; // px proximity threshold
+  const app = document.getElementById('app');
+  const card = document.getElementById('card');
+  const buttons = document.getElementById('buttons');
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const success = document.getElementById('success');
+
+  // Ensure the no button is absolutely positioned relative to .buttons container
+  noBtn.style.position = 'absolute';
+
+  // place initial random position
+  placeNoRandom();
+
+  // track pointer (mouse or touch)
+  let pointer = { x: -9999, y: -9999 };
+
+  function updatePointerFromEvent(e) {
+    if (e.touches && e.touches[0]) {
+      pointer.x = e.touches[0].clientX;
+      pointer.y = e.touches[0].clientY;
+    } else {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+    }
+  }
+
+  function getElementCenter(el) {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  function checkProximityAndMaybeJump() {
+    const center = getElementCenter(noBtn);
+    const dist = Math.hypot(center.x - pointer.x, center.y - pointer.y);
+    if (dist < TRIGGER_DISTANCE) {
+      placeNoRandom();
+    }
+  }
+
+  // mouse move
+  window.addEventListener('mousemove', (e) => {
+    updatePointerFromEvent(e);
+    checkProximityAndMaybeJump();
+  }, { passive: true });
+
+  // touch move (mobile)
+  window.addEventListener('touchmove', (e) => {
+    updatePointerFromEvent(e);
+    checkProximityAndMaybeJump();
+  }, { passive: true });
+
+  // if user tries to touch or press the No button, move it immediately
+  noBtn.addEventListener('touchstart', function (e) {
+    // prevent immediate click on some browsers and move away
+    e.preventDefault();
+    placeNoRandom();
+  }, { passive: false });
+
+  noBtn.addEventListener('pointerdown', function (e) {
+    // pointerdown covers mouse and stylus; move away
+    // For mouse this will also fire, but we still move away which is intended
+    placeNoRandom();
+  }, { passive: true });
+
+  // block actual click on No (keep it evasive)
+  noBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    placeNoRandom();
+  });
+
+  // Yes click -> show success overlay
+  yesBtn.addEventListener('click', function () {
+    success.style.display = 'flex';
+  });
+
+  // Random-placement routine inside the buttons box with full visibility
+  function placeNoRandom() {
+    const area = buttons.getBoundingClientRect();
+    const btn = noBtn.getBoundingClientRect();
+
+    // compute available space inside buttons container for the button to fit fully
+    const padding = 6;
+    const maxLeft = Math.max(padding, area.width - btn.width - padding);
+    const maxTop = Math.max(padding, area.height - btn.height - padding);
+
+    // pick random coords relative to buttons left/top
+    const left = Math.floor(Math.random() * maxLeft);
+    const top = Math.floor(Math.random() * maxTop);
+
+    noBtn.style.left = left + 'px';
+    noBtn.style.top = top + 'px';
+
+    // subtle pop animation using Web Animations API
+    try {
+      noBtn.animate([
+        { transform: 'translateY(-6px) scale(0.96)' },
+        { transform: 'translateY(0) scale(1)' }
+      ], { duration: 220, easing: 'cubic-bezier(.2,.9,.2,1)' });
+    } catch (err) { /* ignore if WAAPI not supported */ }
+  }
+
+  // Reposition on resize to avoid layout issues
+  window.addEventListener('resize', () => {
+    setTimeout(placeNoRandom, 80);
+  });
+
+  // Small periodic jitter in case button somehow overlaps (keeps interface lively)
+  setInterval(() => {
+    if (Math.random() < 0.06) placeNoRandom();
+  }, 1700);
+
+  // Ensure pointer initially outside so it won't trigger instantly
+  pointer.x = -9999; pointer.y = -9999;
+
+})();
+</script>
+</body>
+</html>
