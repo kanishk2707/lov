@@ -1,256 +1,277 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Will you marry me?</title>
-<style>
-  /* Reset */
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-    background: linear-gradient(180deg,#020617 0%, #081426 55%, #0b1b25 100%);
-    color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Will you marry me?</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{height:100%}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(180deg,#020617 0%, #081426 55%, #0b1b25 100%);
+      color:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
 
-  /* Container */
-  .app{
-    width:920px;max-width:96vw;height:640px;max-height:92vh;border-radius:18px;
-    position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(2,6,23,0.7);
-    background:
-      radial-gradient(600px 300px at 50% 12%, rgba(0,255,255,0.06), transparent 10%),
-      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.03);
-  }
+    .app {
+      width:920px; max-width:96vw; height:640px; max-height:92vh;
+      border-radius:18px; overflow:hidden; position:relative;
+      box-shadow:0 20px 50px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
 
-  /* animated rays (pure CSS, performant) */
-  .rays{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
-  .ray{
-    position:absolute;left:50%;top:-10%;
-    width:260%;height:120%;
-    transform-origin:center top;
-    background: linear-gradient(180deg, rgba(0,255,255,0.18), rgba(0,200,255,0.05));
-    filter: blur(32px) saturate(140%);
-    mix-blend-mode:screen; opacity:0.55;
-    animation: float 7000ms linear infinite;
-  }
-  .ray.r2{ transform: translateX(-40%) rotate(-6deg) scaleX(0.85); opacity:0.42; animation-duration:8200ms }
-  .ray.r3{ transform: translateX(30%) rotate(6deg) scaleX(1.05); opacity:0.35; animation-duration:5800ms; filter: blur(40px) saturate(160%) }
-  @keyframes float {
-    0%{ transform: translateX(-50%) rotate(-1deg) scaleX(1); opacity:0.55 }
-    50%{ transform: translateX(-45%) rotate(1.25deg) scaleX(1.03); opacity:0.9 }
-    100%{ transform: translateX(-50%) rotate(-1deg) scaleX(1); opacity:0.55 }
-  }
+    /* Canvas fills the container */
+    .bg-canvas { position:absolute; inset:0; z-index:1; display:block; }
 
-  /* Foreground card */
-  .card{
-    position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:min(700px,92%);padding:36px;border-radius:16px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 12px 40px rgba(3,12,22,0.55);
-    text-align:center;
-  }
+    .card{
+      position:absolute; z-index:6; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:min(700px,92%); padding:34px; border-radius:14px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow:0 12px 40px rgba(3,12,22,0.55); text-align:center;
+    }
 
-  .question{
-    font-size:34px; line-height:1.1; color:#f2fcff; margin-bottom:20px;
-  }
+    .question{ font-size:34px; color:#f2fcff; margin-bottom:20px; line-height:1.1; }
 
-  .buttons{
-    position:relative; height:110px; display:flex; align-items:center; justify-content:center;
-  }
+    .buttons { position:relative; height:110px; display:flex; align-items:center; justify-content:center; }
 
-  .btn{
-    user-select:none; padding:14px 28px; font-size:18px; border-radius:12px; border:none;
-    cursor:pointer; transition:transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
-    min-width:140px; font-weight:700;
-  }
+    .btn{
+      user-select:none; padding:14px 28px; font-size:18px; border-radius:12px; border:none;
+      cursor:pointer; transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms;
+      min-width:140px; font-weight:700;
+    }
+    .btn-yes{
+      position:relative;
+      background: linear-gradient(180deg, rgba(0,230,255,0.14), rgba(0,205,255,0.06));
+      color:#eaffff; border:1px solid rgba(0,230,255,0.12);
+      box-shadow:0 12px 30px rgba(0,200,255,0.06), inset 0 -2px 0 rgba(255,255,255,0.03);
+      z-index:7;
+    }
+    .btn-no{
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      background: linear-gradient(180deg, rgba(255,90,125,0.06), rgba(255,90,125,0.03));
+      color:#ffdce3; border:1px solid rgba(255,90,125,0.06);
+      box-shadow:0 12px 30px rgba(255,80,120,0.03);
+      touch-action: manipulation;
+    }
 
-  .btn:active{ transform:translateY(2px) scale(0.995) }
+    .success{
+      position:absolute; inset:0; z-index:9; display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:12px; background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.46));
+      color:#fff; text-align:center; padding:20px; font-size:18px;
+    }
+    .success h1{ font-size:44px; color:#fff8ea; letter-spacing:1px; }
 
-  .btn-yes{
-    position:relative;
-    background: linear-gradient(180deg, rgba(0,230,255,0.14), rgba(0,205,255,0.06));
-    color:#eaffff; border:1px solid rgba(0,230,255,0.12);
-    box-shadow:0 12px 30px rgba(0,200,255,0.06), inset 0 -2px 0 rgba(255,255,255,0.03);
-    z-index:7;
-  }
-
-  .btn-no{
-    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    background: linear-gradient(180deg, rgba(255,90,125,0.06), rgba(255,90,125,0.03));
-    color:#ffdce3; border:1px solid rgba(255,90,125,0.06);
-    box-shadow:0 12px 30px rgba(255,80,120,0.03);
-    touch-action: manipulation;
-  }
-
-  /* success overlay */
-  .success{
-    position:absolute; inset:0; z-index:9; display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:12px; background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.46));
-    color:#fff; text-align:center; padding:20px;
-  }
-  .success h1{ font-size:44px; color:#fff8ea; letter-spacing:1px; }
-
-  /* small screens */
-  @media (max-width:520px){
-    .card{ padding:20px; border-radius:12px }
-    .question{ font-size:22px }
-    .buttons{ height:140px }
-    .btn{ font-size:16px; min-width:120px; padding:12px 18px }
-  }
-</style>
+    @media (max-width:520px){
+      .card{ padding:18px; border-radius:12px }
+      .question{ font-size:22px }
+      .buttons{ height:140px }
+      .btn{ font-size:16px; min-width:120px; padding:12px 18px }
+    }
+  </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="rays" aria-hidden="true">
-      <div class="ray r1"></div>
-      <div class="ray r2"></div>
-      <div class="ray r3"></div>
-    </div>
+  <div id="root"></div>
 
-    <div class="card" id="card">
-      <div class="question">will you marry me</div>
-      <div class="buttons" id="buttons">
-        <button id="yes" class="btn btn-yes">Yes</button>
-        <button id="no" class="btn btn-no" aria-label="No">No</button>
-      </div>
-    </div>
+  <!-- UMD React + ReactDOM (reliable UMD bundles) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <div id="success" class="success" style="display:none;">
-      <h1>yassssss we  marryyyyy</h1>
-      <p>so happy!</p>
-    </div>
-  </div>
+  <script>
+  (function () {
+    const React = window.React;
+    const ReactDOM = window.ReactDOM;
+    const { useRef, useEffect, useState } = React;
 
-<script>
-/*
-  Behavior:
-   - No button jumps to a random position inside the .buttons area when:
-       - mouse pointer is within threshold px of its center (desktop)
-       - user touches/pointerdown on it (mobile)
-   - Keeps jumping indefinitely until user clicks Yes
-   - Uses only vanilla JS; no external libs
-*/
+    /* Canvas background: draws animated light rays (simple, performant) */
+    function useLightCanvas(canvasRef, opts = {}) {
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
+        let raf = null;
+        const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-(function () {
-  const TRIGGER_DISTANCE = 140; // px proximity threshold
-  const app = document.getElementById('app');
-  const card = document.getElementById('card');
-  const buttons = document.getElementById('buttons');
-  const noBtn = document.getElementById('no');
-  const yesBtn = document.getElementById('yes');
-  const success = document.getElementById('success');
+        function resize() {
+          const rect = canvas.getBoundingClientRect();
+          canvas.width = Math.max(1, Math.floor(rect.width * DPR));
+          canvas.height = Math.max(1, Math.floor(rect.height * DPR));
+        }
 
-  // Ensure the no button is absolutely positioned relative to .buttons container
-  noBtn.style.position = 'absolute';
+        // Simple animated rays: draw blurred gradient + moving streaks
+        let t0 = performance.now();
+        function frame(now) {
+          const t = (now - t0) * 0.001;
+          const w = canvas.width, h = canvas.height;
+          ctx.clearRect(0,0,w,h);
 
-  // place initial random position
-  placeNoRandom();
+          // base glow gradient
+          const g = ctx.createLinearGradient(0, 0, 0, h);
+          g.addColorStop(0, 'rgba(0,255,255,0.12)');
+          g.addColorStop(0.25, 'rgba(0,200,255,0.06)');
+          g.addColorStop(1, 'rgba(0,0,0,0.00)');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
 
-  // track pointer (mouse or touch)
-  let pointer = { x: -9999, y: -9999 };
+          // moving streaks
+          ctx.globalCompositeOperation = 'lighter';
+          for (let i = 0; i < 3; i++) {
+            const offset = t * (0.25 + i * 0.18);
+            const alpha = 0.08 + i * 0.05;
+            drawStreak(ctx, w, h, offset, alpha, i);
+          }
+          ctx.globalCompositeOperation = 'source-over';
 
-  function updatePointerFromEvent(e) {
-    if (e.touches && e.touches[0]) {
-      pointer.x = e.touches[0].clientX;
-      pointer.y = e.touches[0].clientY;
-    } else {
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
+          raf = requestAnimationFrame(frame);
+        }
+
+        function drawStreak(ctx, w, h, offset, alpha, idx) {
+          ctx.save();
+          ctx.translate(w / 2, -h * 0.15 + idx * 30);
+          ctx.rotate((Math.sin(offset * 0.6 + idx) * 6) * Math.PI / 180);
+          // gradient for streak
+          const grad = ctx.createLinearGradient(-w*0.6, 0, w*0.6, 0);
+          grad.addColorStop(0, `rgba(0,255,255,${0 * alpha})`);
+          grad.addColorStop(0.3, `rgba(0,255,255,${0.12 * alpha})`);
+          grad.addColorStop(0.5, `rgba(0,200,255,${0.26 * alpha})`);
+          grad.addColorStop(1, `rgba(0,255,255,${0.06 * alpha})`);
+          ctx.fillStyle = grad;
+
+          // draw skewed rectangle as streak with blur effect (using shadow)
+          ctx.shadowColor = 'rgba(0,255,255,0.8)';
+          ctx.shadowBlur = 40 + idx * 12;
+          ctx.fillRect(-w * 0.9 + (Math.sin(offset + idx) * w * 0.2), 0, w * 1.8, h * 0.2);
+          ctx.restore();
+        }
+
+        function onResize() {
+          resize();
+        }
+
+        window.addEventListener('resize', onResize);
+        resize();
+        raf = requestAnimationFrame(frame);
+
+        return () => {
+          window.removeEventListener('resize', onResize);
+          if (raf) cancelAnimationFrame(raf);
+        };
+      }, [canvasRef]);
     }
-  }
 
-  function getElementCenter(el) {
-    const r = el.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  }
+    /* Main React app */
+    function App() {
+      const canvasRef = useRef(null);
+      useLightCanvas(canvasRef);
 
-  function checkProximityAndMaybeJump() {
-    const center = getElementCenter(noBtn);
-    const dist = Math.hypot(center.x - pointer.x, center.y - pointer.y);
-    if (dist < TRIGGER_DISTANCE) {
-      placeNoRandom();
+      const containerRef = useRef(null);
+      const noRef = useRef(null);
+      const yesRef = useRef(null);
+      const [accepted, setAccepted] = useState(false);
+
+      const TRIGGER_DISTANCE = 130;
+
+      // initial placement
+      useEffect(() => {
+        const no = noRef.current;
+        if (!no) return;
+        no.style.position = 'absolute';
+        placeNoRandom();
+      }, []);
+
+      // proximity detection
+      useEffect(() => {
+        function updatePointer(e) {
+          const pointerX = (e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX)) || -9999;
+          const pointerY = (e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY)) || -9999;
+          const no = noRef.current;
+          if (!no) return;
+          const nb = no.getBoundingClientRect();
+          const nbC = { x: nb.left + nb.width/2, y: nb.top + nb.height/2 };
+          const dist = Math.hypot(nbC.x - pointerX, nbC.y - pointerY);
+          if (dist < TRIGGER_DISTANCE) placeNoRandom();
+        }
+
+        window.addEventListener('mousemove', updatePointer, { passive: true });
+        window.addEventListener('touchmove', updatePointer, { passive: true });
+        return () => {
+          window.removeEventListener('mousemove', updatePointer);
+          window.removeEventListener('touchmove', updatePointer);
+        };
+      }, []);
+
+      // No button touch/click handling
+      useEffect(() => {
+        const no = noRef.current;
+        if (!no) return;
+
+        const onTouch = (e) => { e.preventDefault(); placeNoRandom(); };
+        const onPointer = (e) => { placeNoRandom(); };
+        const onClick = (e) => { e.preventDefault(); placeNoRandom(); };
+
+        no.addEventListener('touchstart', onTouch, { passive: false });
+        no.addEventListener('pointerdown', onPointer, { passive: true });
+        no.addEventListener('click', onClick);
+
+        return () => {
+          no.removeEventListener('touchstart', onTouch);
+          no.removeEventListener('pointerdown', onPointer);
+          no.removeEventListener('click', onClick);
+        };
+      }, []);
+
+      function placeNoRandom() {
+        const container = containerRef.current;
+        const no = noRef.current;
+        if (!container || !no) return;
+        const inner = container.querySelector('.card');
+        const buttons = inner.querySelector('.buttons');
+        const area = buttons.getBoundingClientRect();
+        const btn = no.getBoundingClientRect();
+
+        const padding = 6;
+        const maxLeft = Math.max(padding, area.width - btn.width - padding);
+        const maxTop = Math.max(padding, area.height - btn.height - padding);
+
+        const left = Math.floor(Math.random() * maxLeft);
+        const top = Math.floor(Math.random() * maxTop);
+
+        // position relative to buttons container
+        // compute buttons' left/top to set absolute coords relative to it
+        const relLeft = left;
+        const relTop = top;
+
+        no.style.left = relLeft + 'px';
+        no.style.top = relTop + 'px';
+
+        // tiny animation
+        if (no.animate) {
+          no.animate([{ transform: 'translateY(-6px) scale(0.96)' }, { transform: 'translateY(0) scale(1)' }], { duration: 200, easing: 'cubic-bezier(.2,.9,.2,1)' });
+        }
+      }
+
+      function handleYes() { setAccepted(true); }
+
+      return React.createElement('div', { className: 'app', ref: containerRef },
+        React.createElement('canvas', { ref: canvasRef, className: 'bg-canvas', style: { width: '100%', height: '100%' } }),
+        React.createElement('div', { className: 'card' },
+          React.createElement('div', { className: 'question' }, 'will you marry me'),
+          React.createElement('div', { className: 'buttons' },
+            React.createElement('button', { ref: yesRef, className: 'btn btn-yes', onClick: handleYes, style: { position: 'relative' } }, 'Yes'),
+            React.createElement('button', { ref: noRef, className: 'btn btn-no', 'aria-label': 'No' }, 'No')
+          )
+        ),
+        accepted && React.createElement('div', { className: 'success' },
+          React.createElement('h1', null, 'yassssss we  marryyyyy'),
+          React.createElement('p', null, 'so happy!')
+        )
+      );
     }
-  }
 
-  // mouse move
-  window.addEventListener('mousemove', (e) => {
-    updatePointerFromEvent(e);
-    checkProximityAndMaybeJump();
-  }, { passive: true });
-
-  // touch move (mobile)
-  window.addEventListener('touchmove', (e) => {
-    updatePointerFromEvent(e);
-    checkProximityAndMaybeJump();
-  }, { passive: true });
-
-  // if user tries to touch or press the No button, move it immediately
-  noBtn.addEventListener('touchstart', function (e) {
-    // prevent immediate click on some browsers and move away
-    e.preventDefault();
-    placeNoRandom();
-  }, { passive: false });
-
-  noBtn.addEventListener('pointerdown', function (e) {
-    // pointerdown covers mouse and stylus; move away
-    // For mouse this will also fire, but we still move away which is intended
-    placeNoRandom();
-  }, { passive: true });
-
-  // block actual click on No (keep it evasive)
-  noBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    placeNoRandom();
-  });
-
-  // Yes click -> show success overlay
-  yesBtn.addEventListener('click', function () {
-    success.style.display = 'flex';
-  });
-
-  // Random-placement routine inside the buttons box with full visibility
-  function placeNoRandom() {
-    const area = buttons.getBoundingClientRect();
-    const btn = noBtn.getBoundingClientRect();
-
-    // compute available space inside buttons container for the button to fit fully
-    const padding = 6;
-    const maxLeft = Math.max(padding, area.width - btn.width - padding);
-    const maxTop = Math.max(padding, area.height - btn.height - padding);
-
-    // pick random coords relative to buttons left/top
-    const left = Math.floor(Math.random() * maxLeft);
-    const top = Math.floor(Math.random() * maxTop);
-
-    noBtn.style.left = left + 'px';
-    noBtn.style.top = top + 'px';
-
-    // subtle pop animation using Web Animations API
-    try {
-      noBtn.animate([
-        { transform: 'translateY(-6px) scale(0.96)' },
-        { transform: 'translateY(0) scale(1)' }
-      ], { duration: 220, easing: 'cubic-bezier(.2,.9,.2,1)' });
-    } catch (err) { /* ignore if WAAPI not supported */ }
-  }
-
-  // Reposition on resize to avoid layout issues
-  window.addEventListener('resize', () => {
-    setTimeout(placeNoRandom, 80);
-  });
-
-  // Small periodic jitter in case button somehow overlaps (keeps interface lively)
-  setInterval(() => {
-    if (Math.random() < 0.06) placeNoRandom();
-  }, 1700);
-
-  // Ensure pointer initially outside so it won't trigger instantly
-  pointer.x = -9999; pointer.y = -9999;
-
-})();
-</script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  })();
+  </script>
 </body>
 </html>
